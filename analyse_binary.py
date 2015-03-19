@@ -27,13 +27,13 @@ def main():
     database = analyse_file()
 
     # Save the data to the file
-    print 'Saving data to file...'
+    print 'Saving database...'
     with open(file_path, 'wb') as f:
         pickler = pickle.Pickler(f, -1)
         pickler.fast = True
         pickler.dump(database)
 
-    print 'Done!'
+    print 'Database has been saved!'
 
 if __name__ == '__main__':
     main()

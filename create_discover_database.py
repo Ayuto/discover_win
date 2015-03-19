@@ -19,9 +19,9 @@ MAX_MULTI_MATCH = 5
 # =============================================================================
 # >> FUNCTIONS
 # =============================================================================
-def discover_functions(linux_db, windows_db):
+def discover_functions(linux_db, windows_db, discover_db_path):
     '''
-    Discovers and renames Windows functions based on the given databases.
+    Discovers Windows functions based on the given databases.
     '''
 
     exact_matches = []
@@ -49,38 +49,16 @@ def discover_functions(linux_db, windows_db):
         else:
             multiple_matches.append((linux_func, possible_functions))
 
-    count = 0
+    print 'Found {0} multiple matches.'.format(len(multiple_matches))
+    print 'Found {0} exact matches.'.format(len(exact_matches))
 
-    print 'Adding multiple matches...'
-    for linux_func, possible_functions in multiple_matches:
-        for index, data in enumerate(possible_functions):
-            win_func_ea, win_func = data
+    print 'Saving database...'
+    with open(discover_db_path, 'wb') as f:
+        pickler = pickle.Pickler(f, -1)
+        pickler.fast = True
+        pickler.dump((exact_matches, multiple_matches))
 
-            if (linux_func, win_func_ea, win_func) in exact_matches:
-                continue
-
-            comment = GetFuncOffset(win_func_ea)
-            if not comment.startswith('sub_'):
-                continue
-
-            new_comment = 'MultiMatch_{0}'.format(linux_func.pretty_name)
-            SetFunctionCmt(win_func_ea, new_comment, 1)
-            MakeName(win_func_ea, 'MultiMatch{0}_{1}'.format(index, linux_func.name))
-            print 'Renaming {0} to {1}'.format(comment, new_comment)
-            count += 1
-
-    print 'Adding exact matches...'
-    for linux_func, win_func_ea, win_func in exact_matches:
-        comment = GetFuncOffset(win_func_ea)
-        if not comment.startswith('sub_'):
-            continue
-
-        SetFunctionCmt(win_func_ea, linux_func.pretty_name, 1)
-        MakeName(win_func_ea, linux_func.name)
-        print 'Renaming {0} to {1}'.format(comment, linux_func.pretty_name)
-        count += 1
-
-    print 'Renamed {0} functions!'.format(count)
+    print 'Database has been saved!'
 
 
 # =============================================================================
@@ -91,6 +69,7 @@ def main():
     Discovers Windows functions based on the given database.
     '''
 
+    # Get cleaned up database path
     cleaned_up_path = AskFile(0, '*.db', 'Select the cleaned up database')
     if cleaned_up_path is None:
         return
@@ -98,7 +77,12 @@ def main():
     with open(cleaned_up_path, 'rb') as f:
         linux_db, windows_db = pickle.load(f)
 
-    discover_functions(linux_db, windows_db)
+    # Get discovered database path
+    file_path = AskFile(1, '*.db', 'Select a destination for the discovered database')
+    if file_path is None:
+        return
+
+    discover_functions(linux_db, windows_db, file_path)
 
 if __name__ == '__main__':
     main()
