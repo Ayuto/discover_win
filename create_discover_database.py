@@ -64,25 +64,34 @@ def discover_functions(linux_db, windows_db, discover_db_path):
 # =============================================================================
 # >> MAIN ROUTINE
 # =============================================================================
-def main():
+def unpack_and_discover(cleaned_up_path, file_path):
+    with open(cleaned_up_path, 'rb') as f:
+        linux_db, windows_db = pickle.load(f)
+
+    discover_functions(linux_db, windows_db, file_path)
+
+def main_ida():
     '''
     Discovers Windows functions based on the given database.
     '''
-
-    # Get cleaned up database path
     cleaned_up_path = AskFile(0, '*.db', 'Select the cleaned up database')
     if cleaned_up_path is None:
         return
 
-    with open(cleaned_up_path, 'rb') as f:
-        linux_db, windows_db = pickle.load(f)
-
-    # Get discovered database path
     file_path = AskFile(1, '*.db', 'Select a destination for the discovered database')
     if file_path is None:
         return
 
-    discover_functions(linux_db, windows_db, file_path)
+    unpack_and_discover(cleaned_up_path, file_path)
+
+def main_normal(cleaned_up_path, file_path):
+    unpack_and_discover(cleaned_up_path, file_path)
 
 if __name__ == '__main__':
-    main()
+    try:
+        import idautils
+    except ImportError:
+        import sys
+        main_normal(*sys.argv[1:])
+    else:
+        main_ida()

@@ -2,14 +2,17 @@
 # >> IMPORTS
 # =============================================================================
 # IDA
-from idautils import Strings
-from idautils import Functions
-from idautils import XrefsTo
+try:
+    from idautils import Strings
+    from idautils import Functions
+    from idautils import XrefsTo
 
-from idc import GetFunctionName
-from idc import GetFunctionAttr
-from idc import GetFuncOffset
-from idc import FUNCATTR_START
+    from idc import GetFunctionName
+    from idc import GetFunctionAttr
+    from idc import GetFuncOffset
+    from idc import FUNCATTR_START
+except ImportError:
+    print('Script has been called outside of IDA.')
 
 
 # =============================================================================
