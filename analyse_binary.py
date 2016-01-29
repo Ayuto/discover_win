@@ -4,36 +4,25 @@
 # Python
 import cPickle as pickle
 
-# win_discoverer
-from database import analyse_file
+# discover_win
+from database import Database
 
 
 # =============================================================================
-# >> MAIN ROUTINE
+# >> MAIN
 # =============================================================================
 def main():
-    '''
-    Analyses a binary file and saves the data to the given file.
-    '''
-
-    # Ask the user for a file to save
+    """Ask for a file, analyse the currently opened database and save it."""
     file_path = AskFile(1, '*.db', 'Select a destination for the database')
-
-    # Did the user canceled the dialog?
     if file_path is None:
+        print 'Script has been cancelled.'
         return
 
-    # Analyse the file
-    database = analyse_file()
+    database = Database()
+    print 'Strings:', len(database.strings)
+    print 'Functions:', len(database.functions)
+    database.save(file_path)
 
-    # Save the data to the file
-    print 'Saving database...'
-    with open(file_path, 'wb') as f:
-        pickler = pickle.Pickler(f, -1)
-        pickler.fast = True
-        pickler.dump(database)
-
-    print 'Database has been saved!'
 
 if __name__ == '__main__':
     main()
