@@ -12,6 +12,11 @@ def rename_functions(functions):
     """Rename unnamed functions in the binary using the given functions."""
     count = 0
     for ea, symbol in functions:
+        # Skip functions with an auto-generated name
+        if symbol.startswith('sub_'):
+            continue
+        
+        # Skip names that have been renamed already (or already had a name)
         if not GetFunctionName(ea).startswith('sub_'):
             continue
 
